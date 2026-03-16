@@ -160,15 +160,7 @@ services:
       - "9102:9102"
       - "8125:8125/udp"
 
-  jenkins:
-    image: jenkins/jenkins:lts
-    container_name: jenkins
-    ports:
-      - "8090:8080"
-    volumes:
-      - jenkins_home:/var/jenkins_home
-      - /var/run/docker.sock:/var/run/docker.sock
-
+ 
 volumes:
   postgres_data:
   grafana_data:
