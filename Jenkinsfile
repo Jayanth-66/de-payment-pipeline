@@ -83,6 +83,7 @@ pipeline {
                 // This launches the entire streaming platform stack
                 // defined in docker-compose.yml
                 sh '''
+                cd docker
                 docker-compose down || true
                 docker-compose up -d --build
                 '''
