@@ -1,0 +1,22 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+.venv/
+venv/
+
+# VS Code
+.vscode/
+
+# Jenkins config
+config.xml
+
+# Airflow logs
+airflow/logs/
+
+# System files
+.DS_Store
+Thumbs.db
