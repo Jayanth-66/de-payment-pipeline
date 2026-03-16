@@ -92,7 +92,9 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - /var/jenkins_home/workspace/de-payment-pipeline/docker/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./docker:/etc/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
     restart: unless-stopped
 
   grafana:
