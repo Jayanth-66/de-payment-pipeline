@@ -70,7 +70,7 @@ services:
 
   flink-jobmanager:
     build:
-      context: .
+      context: ..
       dockerfile: Dockerfile.flink
     container_name: flink-jobmanager
     command: jobmanager
@@ -84,7 +84,7 @@ services:
 
   flink-taskmanager:
     build:
-      context: .
+      context: ..
       dockerfile: Dockerfile.flink
     container_name: flink-taskmanager
     command: taskmanager
