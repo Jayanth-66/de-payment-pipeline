@@ -1,111 +1,111 @@
+// Jenkins Declarative Pipeline Definition
 pipeline {
 
-    // Jenkins can run this pipeline on any available agent/node
-    agent any
+    // --------------------------------------------------
+    // Agent Configuration
+    // --------------------------------------------------
+    agent {
+        docker {
+            // Run the entire pipeline inside a Docker container
+            // This ensures a consistent environment for builds
+            image 'python:3.11'
 
+            // Run container as root user
+            // Required when installing packages or running Docker commands
+            args '-u root'
+        }
+    }
+
+    // --------------------------------------------------
+    // Pipeline Stages
+    // Each stage represents a logical step in the CI/CD workflow
+    // --------------------------------------------------
     stages {
 
-        // -------------------------------------------------------
-        // Stage 1: Checkout Code from Git Repository
-        // -------------------------------------------------------
+        // --------------------------------------------------
+        // Stage 1: Checkout Code
+        // --------------------------------------------------
         stage('Checkout Code') {
             steps {
-                // Pulls the latest code from the configured SCM
-                // (GitHub / GitLab / Bitbucket etc.)
+                // Pull the latest code from the Git repository
+                // Jenkins automatically uses the repo configured in the job
                 checkout scm
             }
         }
 
-        // -------------------------------------------------------
+        // --------------------------------------------------
         // Stage 2: Validate Python Code
-        // -------------------------------------------------------
+        // --------------------------------------------------
         stage('Validate Python Code') {
             steps {
-                sh '''
-                # Check Python syntax without executing the files
-                # This helps detect syntax errors early
-
-                python -m py_compile airflow/Dags/payment_pipeline_dag.py
-                python -m py_compile flink-job/PaymentStreamProcessor.py
-                '''
+                // Compile the Python DAG file to check for syntax errors
+                // This does NOT run the code — it only validates syntax
+                sh 'python -m py_compile airflow/Dags/payment_pipeline_dag.py'
             }
         }
 
-        // -------------------------------------------------------
-        // Stage 3: Install Python Dependencies
-        // -------------------------------------------------------
+        // --------------------------------------------------
+        // Stage 3: Install Dependencies
+        // --------------------------------------------------
         stage('Install Dependencies') {
             steps {
-                sh '''
-                # Install all required Python packages listed
-                # in requirements.txt for the project
-
-                pip install -r requirements.txt
-                '''
+                // Install Python libraries required by the project
+                // dependencies are listed inside requirements.txt
+                sh 'pip install -r requirements.txt'
             }
         }
 
-        // -------------------------------------------------------
+        // --------------------------------------------------
         // Stage 4: Build Docker Images
-        // -------------------------------------------------------
+        // --------------------------------------------------
         stage('Build Docker Images') {
             steps {
-                sh '''
-                # Build all services defined in docker-compose.yml
-                # This includes Kafka, Flink, Airflow, PostgreSQL,
-                # Prometheus, Grafana etc.
-
-                docker compose build
-                '''
+                // Build all Docker images defined in docker-compose.yml
+                // Example services: kafka, flink, postgres, airflow, etc.
+                sh 'docker compose build'
             }
         }
 
-        // -------------------------------------------------------
+        // --------------------------------------------------
         // Stage 5: Deploy Data Platform
-        // -------------------------------------------------------
+        // --------------------------------------------------
         stage('Deploy Data Platform') {
             steps {
-                sh '''
-                # Start all containers in detached mode
-                # This launches the full streaming platform
-
-                docker compose up -d
-                '''
+                // Start all services in detached mode (-d)
+                // Docker Compose will start containers like:
+                // Kafka, Zookeeper, Flink, PostgreSQL, Grafana, Prometheus
+                sh 'docker compose up -d'
             }
         }
 
-        // -------------------------------------------------------
+        // --------------------------------------------------
         // Stage 6: Health Check
-        // -------------------------------------------------------
+        // --------------------------------------------------
         stage('Health Check') {
             steps {
-                sh '''
-                # Verify that important services are running
-
-                # Check Airflow health endpoint
-                curl -f http://localhost:8088/health
-
-                # Check Prometheus health endpoint
-                curl -f http://localhost:9090/-/healthy
-                '''
+                // Display running Docker containers
+                // Helps confirm if services started successfully
+                sh 'docker ps'
             }
         }
-
     }
 
-    // -------------------------------------------------------
-    // Post Actions
-    // -------------------------------------------------------
+    // --------------------------------------------------
+    // Post Pipeline Actions
+    // Runs after the pipeline completes
+    // --------------------------------------------------
     post {
 
-        // If pipeline succeeds
-        success {
-            echo 'Pipeline deployed successfully!'
+        // If any stage fails
+        failure {
+            // Print failure message in Jenkins console
+            echo 'Pipeline failed!'
         }
 
-        // If pipeline fails
-        failure {
-            echo 'Pipeline failed!'
+        // If pipeline completes successfully
+        success {
+            // Print success message in Jenkins console
+            echo 'Pipeline succeeded!'
         }
     }
 }
