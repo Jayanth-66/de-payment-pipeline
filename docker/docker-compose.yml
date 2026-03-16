@@ -4,7 +4,6 @@ services:
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
-    container_name: zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
     ports:
@@ -12,7 +11,6 @@ services:
 
   kafka:
     image: confluentinc/cp-kafka:7.5.0
-    container_name: kafka
     depends_on:
       - zookeeper
     ports:
@@ -31,7 +29,6 @@ services:
 
   kafka-exporter:
     image: danielqsj/kafka-exporter
-    container_name: kafka-exporter
     entrypoint:
       - sh
       - -c
@@ -47,7 +44,6 @@ services:
 
   postgres:
     image: postgres:15
-    container_name: postgres
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -60,7 +56,6 @@ services:
 
   postgres-exporter:
     image: prometheuscommunity/postgres-exporter
-    container_name: postgres-exporter
     environment:
       DATA_SOURCE_NAME: "postgresql://postgres:postgres@postgres:5432/payments?sslmode=disable"
     ports:
@@ -72,7 +67,6 @@ services:
     build:
       context: ..
       dockerfile: Dockerfile.flink
-    container_name: flink-jobmanager
     command: jobmanager
     ports:
       - "8081:8081"
@@ -86,7 +80,6 @@ services:
     build:
       context: ..
       dockerfile: Dockerfile.flink
-    container_name: flink-taskmanager
     command: taskmanager
     depends_on:
       - flink-jobmanager
@@ -96,16 +89,14 @@ services:
 
   prometheus:
     image: prom/prometheus:latest
-    container_name: prometheus
     ports:
       - "9090:9090"
     volumes:
-      - ./docker/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
     restart: unless-stopped
 
   grafana:
     image: grafana/grafana:latest
-    container_name: grafana
     depends_on:
       - prometheus
     ports:
@@ -119,7 +110,6 @@ services:
 
   airflow:
     image: apache/airflow:2.9.2
-    container_name: airflow
     depends_on:
       - postgres
       - kafka
@@ -155,12 +145,10 @@ services:
 
   statsd:
     image: prom/statsd-exporter
-    container_name: statsd
     ports:
       - "9102:9102"
       - "8125:8125/udp"
 
- 
 volumes:
   postgres_data:
   grafana_data:
