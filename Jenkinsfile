@@ -82,7 +82,10 @@ pipeline {
                 // Starts all containers in detached mode (-d)
                 // This launches the entire streaming platform stack
                 // defined in docker-compose.yml
-                sh 'docker-compose up -d'
+                sh '''
+                docker-compose down || true
+                docker-compose up -d --build
+                '''
             }
         }
 
